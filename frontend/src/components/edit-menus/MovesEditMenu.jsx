@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function MovesEditMenu({setIsOpen, pageName, moveData, players, sessionName}){
+export default function MovesEditMenu({setIsOpen, pageName, moveData, players, sessionName, participants}){
 
     const [currentPlayer, setPlayer] = useState(moveData.playerName || "");
     const [startingPosition, setStartingPosition] = useState(moveData.startingPosition || 0);
@@ -13,9 +13,9 @@ export default function MovesEditMenu({setIsOpen, pageName, moveData, players, s
             <h2>Edit {pageName}</h2>
             <label>Player:</label>
             <select defaultValue={moveData.playerName} onChange={(e) => setPlayer(e.target.value)} value={currentPlayer}>
-                {players.map(player => (
+                {participants[sessionName]?.map(player => (
                     <option key={player} value={player}>{player}</option>
-                ))}
+                )) || []}
             </select>
             <br />
             <label>Starting Position:</label>

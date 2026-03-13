@@ -222,6 +222,22 @@ JOIN Games g ON gp.gameID = g.gameID
 ORDER BY m.moveID;
 
 -- #############################
+-- SELECT participants (SELECT playerID, firstName, lastName, sessionName FROM v_select_playerParticipants;)
+-- #############################
+DROP VIEW  IF EXISTS v_select_playerParticipants;
+
+CREATE VIEW v_select_playerParticipants AS
+SELECT 
+    gp.participantID,
+    p.playerID,
+    p.firstName,
+    p.lastName,
+    g.sessionName
+FROM GameParticipants gp
+JOIN Players p ON gp.playerID = p.playerID
+JOIN Games g ON gp.gameID = g.gameID;
+
+-- #############################
 -- DELETE player by ID
 -- #############################
 DROP PROCEDURE IF EXISTS sp_deletePlayer;
@@ -391,12 +407,14 @@ CREATE PROCEDURE sp_insertPrize(
     IN pr_prizeName VARCHAR(255),
     IN pr_quantity INT,
     IN pl_firstName VARCHAR(255),
-    IN pl_lastName VARCHAR(255)
+    IN pl_lastName VARCHAR(255),
+    OUT pr_prizeID INT
 )
 BEGIN
     DECLARE playerNameID INT;
     SELECT playerID INTO playerNameID FROM Players WHERE firstName = pl_firstName AND lastName = pl_lastName;
     INSERT INTO Prizes(prizeName, quantity, playerID) VALUES(pr_prizeName, pr_quantity, playerNameID);
+    SET pr_prizeID = LAST_INSERT_ID();
 END //
 DELIMITER ;
 

@@ -8,6 +8,7 @@ export default function Moves(){
     const [games, setGames] = useState({});
     const [moves, setMoves] = useState([]);
     const [players, setPlayers] = useState([]);
+    const [participants, setParticipants] = useState([]);
 
     function getMoves(){
         fetch("http://classwork.engr.oregonstate.edu:7880/moves")
@@ -50,9 +51,24 @@ export default function Moves(){
         .catch(error => console.error("Error fetching players:", error));
     }
 
+    function getParticipants(){
+        fetch("http://classwork.engr.oregonstate.edu:7880/playerParticipants")
+        .then(response => response.json())
+        .then(data => {
+            let participantsData = {};
+            Object.keys(data).forEach(game => {
+                participantsData[game] = data[game].map(participant => participant.firstName + " " + participant.lastName);
+            });
+            setParticipants(participantsData);
+            console.log(participantsData);
+        })
+        .catch(error => console.error("Error fetching participants:", error));
+    }
+
     useEffect(() => {
         getGames();
         getPlayers();
+        getParticipants();
     }, []);
 
     useEffect(() => {
@@ -72,7 +88,7 @@ export default function Moves(){
                 ))}
             </select>
             <br /><br />
-            <AddButton pageName="Move" AddMenu={MovesAddMenu} data={{players, sessionName: selectedGame}} />
+            <AddButton pageName="Move" AddMenu={MovesAddMenu} data={{players, sessionName: selectedGame, participants}} />
             <br /><br />
             <table>
                 <thead>
@@ -87,7 +103,7 @@ export default function Moves(){
                 </thead>
                 <tbody>
                     {moves[selectedGame] && moves[selectedGame].map((move, index) => (
-                        <MoveRow key={index} move={move} index={index} players={players} selectedGame={selectedGame} />
+                        <MoveRow key={index} move={move} index={index} players={players} selectedGame={selectedGame} participants={participants} />
                     ))}
                 </tbody>
             </table>
@@ -95,7 +111,7 @@ export default function Moves(){
     )
 };
 
-function MoveRow({ move, index, players, selectedGame }) {
+function MoveRow({ move, index, players, selectedGame, participants, currentSessionName }) {
     const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
     return (
         <>
@@ -127,7 +143,7 @@ function MoveRow({ move, index, players, selectedGame }) {
             {isEditMenuOpen && (
                 <tr>
                     <td colSpan={6}>
-                        <MovesEditMenu setIsOpen={setIsEditMenuOpen} pageName="Move" moveData={move} players={players} sessionName={selectedGame} />
+                        <MovesEditMenu setIsOpen={setIsEditMenuOpen} pageName="Move" moveData={move} players={players} sessionName={selectedGame} participants={participants} />
                     </td>
                 </tr>
             )}

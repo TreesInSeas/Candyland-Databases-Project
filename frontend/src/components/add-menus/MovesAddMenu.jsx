@@ -3,7 +3,8 @@ import { useState } from "react"
 export default function MovesAddMenu({setIsOpen, pageName, data}){
     const players = data.players || [];
     const sessionName = data.sessionName || "";
-    const [selectedPlayer, setSelectedPlayer] = useState(players.length > 0 ? players[0] : "");
+    const participants = data.participants || [];
+    const [selectedPlayer, setSelectedPlayer] = useState(participants[sessionName]?.[0] || "");
     const [startingPosition, setStartingPosition] = useState(0);
     const [endingPosition, setEndingPosition] = useState(0);
     const [stuck, setStuck] = useState(false);
@@ -14,9 +15,9 @@ export default function MovesAddMenu({setIsOpen, pageName, data}){
             <h2>Add new {pageName}</h2>
             <label>Player:</label>
             <select onChange={(e) => setSelectedPlayer(e.target.value)} value={selectedPlayer}>
-                {players.map(player => (
+                {participants[sessionName]?.map(player => (
                     <option key={player} value={player}>{player}</option>
-                ))}
+                )) || []}
             </select>
             <br />
             <label>Starting Position:</label>

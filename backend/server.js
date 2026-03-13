@@ -49,6 +49,19 @@ app.get('/moves', async (req, res) => {
     res.json(moves);
 });
 
+app.get('/playerParticipants', async (req, res) => {
+    const [playerParticipants] = await db.pool.promise().query('SELECT playerID, firstName, lastName, sessionName FROM v_select_playerParticipants;');
+    const participantsData = {};
+    playerParticipants.forEach(participant => {
+        const gameName = participant.sessionName;
+        if (!participantsData[gameName]) {
+            participantsData[gameName] = [];
+        }
+        participantsData[gameName].push(participant);
+    });
+    res.json(participantsData);
+});
+
 // DELETE ROUTES
 app.delete('/players/:id', async (req, res) => {
     const playerID = req.params.id;
@@ -115,8 +128,9 @@ app.post('/games', async (req, res) => {
 
 app.post('/prizes', async (req, res) => {
     const { prizeName, quantity, playerFirstName, playerLastName } = req.body;
-    await db.pool.promise().query('CALL sp_insertPrize(?, ?, ?, ?);', [prizeName, quantity, playerFirstName, playerLastName]);
-    res.sendStatus(201);
+    await db.pool.promise().query('CALL sp_insertPrize(?, ?, ?, ?, @prizeID);', [prizeName, quantity, playerFirstName, playerLastName]);
+    const [result] = await db.pool.promise().query('SELECT @prizeID as prizeID;');
+    res.json({ prizeID: result[0].prizeID });
 });
 
 app.post('/moves', async (req, res) => {
